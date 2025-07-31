@@ -82,7 +82,7 @@ messageRouter.post('/send/:id', protectRoute, async (req, res)=>{
         })
 
         //Emit the new message to the receiver's socket
-        const receiverSocketId = userSocketMap[recieverId]
+        const receiverSocketId = userSocketMap[receiverId]
         if(receiverSocketId){
             io.to(receiverSocketId).emit("newMessage", newMessage)
         }
