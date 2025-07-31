@@ -1,4 +1,4 @@
-import { Jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 // Function to generate a token for a user
 export const generateToken = (userId)=>{

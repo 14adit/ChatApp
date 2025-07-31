@@ -1,9 +1,14 @@
-import { generateToken } from "../lib/util.js"
-import User from "../models/User"
+import { generateToken } from "../../lib/util.js"
+import User from "../../models/User.js"
+import cloudinary from "../../lib/cloudinary.js"
+import express from "express"
+import protectRoute from "../../middleware/auth.js"
+
+const router = express.Router()
 
 
 // Signup a new user
-export const signup = async (req, res)=>{
+router.post('/signup', async (req, res)=>{
     const {fullname, email, password, bio} = req.body
     try{
         if(!fullname || !email || !password || !bio){
@@ -11,7 +16,7 @@ export const signup = async (req, res)=>{
         }
         const user = await User.findOne({email})
 
-        if(User){
+        if(user){
             return res.json({success: false, message: "Account already exists"})
         }
 
@@ -27,10 +32,10 @@ export const signup = async (req, res)=>{
         console.log(error.message)
         res.json({success: false, message: error.message})
     }
-}
+})
 
 // Controller to login a user
-export const login = async (req, res)=>{
+router.post('/login', async (req, res)=>{
     try{
         const {email, password} = req.body
         const userData = await User.findOne({email})
@@ -49,4 +54,32 @@ export const login = async (req, res)=>{
         console.log(error.message)
         res.json({success: false, message: error.message})
     }
-}
+})
+
+// Controller to check if user is authenticated
+router.get('/check', protectRoute, (req, res)=>{
+    res.json({success: true, user: req.user})
+})
+
+// Controller to update user profile details
+router.put('/update', protectRoute, async(req, res)=>{
+    try{
+        const {profilePic, fullname, bio} = req.body
+
+        const userId = req.user._id
+        let updatedUser;
+
+        if(!profilePic){
+          updatedUser = await User.findByIdAndUpdate(userId, {fullname, bio}, {new: true})
+        } else{
+            const upload = await cloudinary.uploader.upload(profilePic)
+            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, fullname, bio}, {new: true})
+        }
+        res.json({success: true, user: updatedUser})
+    }catch(error){
+        console.log(error.message)
+        res.json({success: false, message: error.message})
+    }
+})
+
+export default router
