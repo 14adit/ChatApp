@@ -55,5 +55,11 @@ app.use("/api/messages", messageRouter)
 // Connect to MongoDb
 await connectDB()
 
-const PORT = process.env.PORT || 5000
-server.listen(PORT, ()=>console.log("Server is running on PORT: "+ PORT))
+//If and only if the project is not deployed it will open on the local server with 5000 port
+if(process.env.NODE_ENV !== "production"){
+    const PORT = process.env.PORT || 5000
+    server.listen(PORT, ()=>console.log("Server is running on PORT: "+ PORT))
+}
+
+//Export server for Vercel
+export default server
