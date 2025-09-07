@@ -42,7 +42,9 @@ io.on("connection", (Socket)=>{
 app.use(express.json({limit: "4mb"}))
 // app.use(cors())
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173",
+    "https://chat-app-teal-mu-70.vercel.app"
+  ],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "token"] // Add 'token' here
 }));
