@@ -3,15 +3,16 @@ import User from "../../models/User.js"
 import cloudinary from "../../lib/cloudinary.js"
 import express from "express"
 import protectRoute from "../../middleware/auth.js"
+import bcrypt from "bcryptjs"
 
 const router = express.Router()
 
 
 // Signup a new user
 router.post('/signup', async (req, res)=>{
-    const {fullname, email, password, bio} = req.body
+    const {fullName, email, password, bio} = req.body
     try{
-        if(!fullname || !email || !password || !bio){
+        if(!fullName || !email || !password || !bio){
             return res.json({success: false, message: "Missing Details"})
         }
         const user = await User.findOne({email})
@@ -23,7 +24,7 @@ router.post('/signup', async (req, res)=>{
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        const newUser = await User.create({fullname, email, password: hashedPassword, bio})
+        const newUser = await User.create({fullName, email, password: hashedPassword, bio})
 
         const token = generateToken(newUser._id)
         res.json({success: true, userData: newUser, token, message: "Accounted created successfully"})
@@ -64,16 +65,16 @@ router.get('/check', protectRoute, (req, res)=>{
 // Controller to update user profile details
 router.put('/update', protectRoute, async(req, res)=>{
     try{
-        const {profilePic, fullname, bio} = req.body
+        const {profilePic, fullName, bio} = req.body
 
         const userId = req.user._id
         let updatedUser;
 
         if(!profilePic){
-          updatedUser = await User.findByIdAndUpdate(userId, {fullname, bio}, {new: true})
+          updatedUser = await User.findByIdAndUpdate(userId, {fullName, bio}, {new: true})
         } else{
             const upload = await cloudinary.uploader.upload(profilePic)
-            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, fullname, bio}, {new: true})
+            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, fullName, bio}, {new: true})
         }
         res.json({success: true, user: updatedUser})
     }catch(error){

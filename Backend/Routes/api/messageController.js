@@ -41,23 +41,23 @@ messageRouter.get('/:id', protectRoute, async (req,res) =>{
                 {senderId: selectedUserId, receiverId: myId},
             ]
         })
-        await Message.upadateMany({sendderId: selectedUserId, recieverId: myId},
+        await Message.updateMany({senderId: selectedUserId, receiverId: myId},
             {seen: true});
             res.json({success: true, messages})
     } catch (error) {
          console.log(error.message)
-         Response.jsson({successs: false, message: error.message})
+         res.json({successs: false, message: error.message})
     }
 })
 
 // api to mark message as seen using message id
-messageRouter.put('mark/:id', protectRoute, async (req, res)=>{
+messageRouter.put('/mark/:id', protectRoute, async (req, res)=>{
     try {
         const { id } = req.params
         await Message.findByIdAndUpdate(id, {seen: true})
         res.json({success: true})
     } catch (error) {
-        console.loog(error.message)
+        console.log(error.message)
         res.json({success: false, message: error.message})
     }
 })
@@ -73,6 +73,7 @@ messageRouter.post('/send/:id', protectRoute, async (req, res)=>{
         if(image){
             const uploadResponse = await cloudinary.uploader.upload(image)
             imageUrl = uploadResponse.secure_url
+            //console.log(imageUrl)
         }
         const newMessage = await Message.create({
             senderId,

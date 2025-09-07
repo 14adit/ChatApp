@@ -5,7 +5,7 @@ import http from "http"
 import connectDB from "./lib/db.js"
 import router from "./Routes/api/userController.js"
 import messageRouter from "./Routes/api/messageController.js"
-import { server } from "socket.io"
+import { Server } from "socket.io"
 
 // Create Express app and HTTP server
 const app = express()
@@ -20,18 +20,18 @@ export const io = new Server(server, {
 export const userSocketMap = {}; // {userId: socketId}
 
 // socket.io connection handler
-io.on("connection", ()=>{
+io.on("connection", (Socket)=>{
     const userId = Socket.handshake.query.userId
     console.log("User Connected", userId)
 
     if(userId){
-        userSocketMap[userId] = Socket.io
+        userSocketMap[userId] = Socket.id
     }
 
     // Emit online users to all connected clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
-    Socket.on("disconnected", ()=>{
+    Socket.on("disconnect", ()=>{
         console.log("User Disconnected", userId)
         delete userSocketMap[userId]
         io.emit("getOnlineUsers", Object.keys(userSocketMap))
@@ -40,12 +40,17 @@ io.on("connection", ()=>{
 
 // Middleware setup
 app.use(express.json({limit: "4mb"}))
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "token"] // Add 'token' here
+}));
 
 // Route Setup
 app.use("/api/status", (req, res)=> res.send("Server is live"))
 app.use("/api/auth",router)
-app.use("api/messages", messageRouter)
+app.use("/api/messages", messageRouter)
 
 // Connect to MongoDb
 await connectDB()

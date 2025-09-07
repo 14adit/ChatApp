@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import { useContext, useState } from 'react'
 import assets from '../assets/assets'
+import { AuthContext } from '../../context/AuthContext'
 
 const LoginPage = () => {
 
@@ -10,6 +11,8 @@ const [password, setPassword] = useState("")
 const [bio, setBio] = useState("")
 const [isDataSubmitted, setIsDataSubmitted] = useState(false)
 
+const { login } = useContext(AuthContext)
+
 const onSubmitHandler = (event) =>{
   event.preventDefault()
 
@@ -17,6 +20,9 @@ const onSubmitHandler = (event) =>{
     setIsDataSubmitted(true)
     return
   }
+
+  // Call the api through axios which is store in AuthContext
+  login(currentState==="Sign Up" ? 'signup' : 'login', {fullName, email, password, bio})
 }
 
   return (
@@ -51,7 +57,7 @@ const onSubmitHandler = (event) =>{
             rows={4} className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Provide a short bio...' required></textarea>
           )}
 
-        <button type='submit' className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer'>
+        <button type="submit" className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer'>
           {currentState === "Sign Up" ? "Create Account" : "Login Now"}
         </button>  
 
